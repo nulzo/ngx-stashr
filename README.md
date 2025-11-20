@@ -6,9 +6,7 @@ Inspired by Zustand.
 
 ## Installation
 
-```bash
-npm i ngx-store
-```
+_TODO: need to finishing publishing_
 
 ## Usage
 
