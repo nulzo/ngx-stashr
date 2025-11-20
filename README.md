@@ -1,59 +1,151 @@
-# NgxStore
+# ngx-store
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.0.
+A slim, signal-based state management library for Angular 21. 
 
-## Development server
+Inspired by Zustand.
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Installation
 
 ```bash
-ng generate component component-name
+npm i ngx-store
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Usage
 
-```bash
-ng generate --help
+### Create a store
+
+Define your state and actions in a store file (e.g., `counter.store.ts`).
+
+```typescript
+import { createStore } from 'ngx-store';
+
+interface CounterState {
+  count: number;
+  increment: () => void;
+  decrement: () => void;
+  reset: () => void;
+}
+
+export const counterStore = createStore<CounterState>((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+  decrement: () => set((state) => ({ count: state.count - 1 })),
+  reset: () => set({ count: 0 }),
+}));
 ```
 
-## Building
+### Use in your components
 
-To build the project run:
+Use the store directly in your components. It's just a signal really.
 
-```bash
-ng build
+```typescript
+import { Component } from '@angular/core';
+import { counterStore } from './counter.store';
+
+@Component({
+  selector: 'app-counter',
+  standalone: true,
+  template: `
+    <h1>Count: {{ store().count }}</h1>
+    <button (click)="store().increment()">+</button>
+    <button (click)="store().decrement()">-</button>
+    <button (click)="store().reset()">Reset</button>
+  `
+})
+export class CounterComponent {
+  readonly store = counterStore;
+}
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Selectors (ie computed state)
 
-## Running unit tests
+You can create computed signals for specific slices of state. This can further optimize performance if needed.
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```typescript
+@Component({ ... })
+export class CounterDisplayComponent {
+  readonly store = counterStore;
+  
+  // only updates when count changes
+  readonly count = this.store.select(state => state.count);
+  
+  // derived state
+  readonly doubleCount = this.store.select(state => state.count * 2);
+}
 ```
 
-## Running end-to-end tests
+## Middleware
 
-For end-to-end (e2e) testing, run:
+### Persust
 
-```bash
-ng e2e
+You can persist state to `localStorage` (or any other storage) using the `persist` middleware.
+
+```typescript
+import { createStore, persist } from 'ngx-store';
+
+export const settingsStore = createStore(
+  persist(
+    (set) => ({
+      theme: 'light',
+      toggleTheme: () => set((state) => ({ 
+        theme: state.theme === 'light' ? 'dark' : 'light' 
+      })),
+    }),
+    {
+      name: 'app-settings', // unique name
+      // storage: sessionStorage // optional, just defaults as localStorage
+    }
+  )
+);
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Logging and debugging
 
-## Additional Resources
+You can debug the state mutations with the `logger` middleware. It will report the previous state, action, and next state to the console.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```typescript
+import { createStore, logger } from 'ngx-store';
+
+export const store = createStore(
+  logger(
+    (set) => ({
+      count: 0,
+      increment: () => set((state) => ({ count: state.count + 1 }), false, 'increment')
+    }),
+    { 
+      name: 'CounterStore',
+      enabled: true // defaults to true
+    }
+  )
+);
+```
+
+### Chaining middlwares
+
+You can compose middleware by swallowing. Just make sure `persist` sits as the outer wrapper if chaining it.
+
+```typescript
+export const store = createStore(
+  persist(
+    logger(
+      (set) => ({ count: 0 }),
+      { name: 'MyStore' }
+    ),
+    { name: 'storage-key' }
+  )
+);
+```
+
+## Core API
+
+### `createStore<T>(setup: StateCreator<T>)`
+
+Creates a store. Returns a Signal that also contains API methods.
+
+### Store Methods
+
+- `store()`: Get the current state (signal).
+- `store.get()`: Get the current state (non-reactive readonly snapshot).
+- `store.set(partial, replace?, ...args)`: Update state. `partial` can be an object or a function `(state) => partial`. Optional `args` are passed to listeners (just useful for logging actions).
+- `store.select(selector)`: Create a computed signal from the state.
+- `store.subscribe(listener)`: Subscribe to state changes manually.
