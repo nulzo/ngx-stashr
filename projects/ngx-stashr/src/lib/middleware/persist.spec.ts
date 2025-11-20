@@ -71,5 +71,63 @@ describe('persist middleware', () => {
     expect(args[1]).toContain('"count":1');
     expect(args[1]).not.toContain('"ignored":"change"');
   });
-});
 
+  it('should handle storage.setItem errors gracefully', () => {
+    const consoleSpy = spyOn(console, 'error');
+    mockStorage.setItem.and.throwError('QuotaExceeded');
+
+    const useStore = createStash(
+      persist<TestState>(
+        () => ({ count: 0 }),
+        { name: 'test-error', storage: mockStorage }
+      )
+    );
+
+    // Should not throw
+    expect(() => useStore.set({ count: 1 })).not.toThrow();
+    
+    // Should log error
+    expect(consoleSpy).toHaveBeenCalledWith(
+        jasmine.stringMatching(/Error saving to storage/), 
+        jasmine.anything()
+    );
+  });
+
+  it('should handle storage.getItem errors gracefully', () => {
+    const consoleSpy = spyOn(console, 'error');
+    mockStorage.getItem.and.throwError('AccessDenied');
+
+    let useStore: any;
+    
+    // Should not throw during initialization
+    expect(() => {
+        useStore = createStash(
+            persist<TestState>(
+                () => ({ count: 0 }),
+                { name: 'test-hydrate-error', storage: mockStorage }
+            )
+        );
+    }).not.toThrow();
+    
+    // Should have default state
+    expect(useStore().count).toBe(0);
+
+    // Should log error
+    expect(consoleSpy).toHaveBeenCalledWith(
+        jasmine.stringMatching(/Error hydrating from storage/), 
+        jasmine.anything()
+    );
+  });
+
+  it('should not crash if storage is undefined', () => {
+    const useStore = createStash(
+      persist<TestState>(
+        () => ({ count: 0 }),
+        { name: 'test-no-storage', storage: undefined }
+      )
+    );
+
+    expect(() => useStore.set({ count: 1 })).not.toThrow();
+    expect(useStore().count).toBe(1);
+  });
+});
