@@ -6,7 +6,9 @@ Inspired by React's [Zustand]().
 
 ## Installation
 
-_TODO: need to finishing publishing_
+```bash
+npm i ngx-stashr
+```
 
 ## Usage
 

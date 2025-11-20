@@ -1,12 +1,14 @@
 # ngx-stashr
 
-A slim, signal-based library for stashing state Angular 21. 
+A slim, signal-based library for stashing state in Angular 21. 
 
-Inspired by Zustand.
+Inspired by React's [Zustand]().
 
 ## Installation
 
-_TODO: need to finishing publishing_
+```bash
+npm i ngx-stashr
+```
 
 ## Usage
 
