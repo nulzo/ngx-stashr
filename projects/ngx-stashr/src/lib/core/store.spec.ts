@@ -1,4 +1,4 @@
-import { createStore } from './store';
+import { createStash } from './store';
 import { TestBed } from '@angular/core/testing';
 
 interface TestState {
@@ -6,15 +6,15 @@ interface TestState {
   name: string;
 }
 
-describe('ngx-store', () => {
+describe('ngx-stashr', () => {
   it('should create a store with initial state', () => {
-    const useStore = createStore<TestState>(() => ({ count: 0, name: 'test' }));
+    const useStore = createStash<TestState>(() => ({ count: 0, name: 'test' }));
     expect(useStore.get()).toEqual({ count: 0, name: 'test' });
     expect(useStore().count).toBe(0);
   });
 
   it('should update state via set', () => {
-    const useStore = createStore<TestState>((set) => ({ count: 0, name: 'test' }));
+    const useStore = createStash<TestState>((set) => ({ count: 0, name: 'test' }));
     
     useStore.set({ count: 1 });
     expect(useStore.get().count).toBe(1);
@@ -22,14 +22,14 @@ describe('ngx-store', () => {
   });
 
   it('should update state via set with function', () => {
-    const useStore = createStore<TestState>((set) => ({ count: 0, name: 'test' }));
+    const useStore = createStash<TestState>((set) => ({ count: 0, name: 'test' }));
     
     useStore.set((state) => ({ count: state.count + 1 }));
     expect(useStore.get().count).toBe(1);
   });
 
   it('should expose a working signal', () => {
-    const useStore = createStore<TestState>(() => ({ count: 10, name: 'signal' }));
+    const useStore = createStash<TestState>(() => ({ count: 10, name: 'signal' }));
     
     // Signal access
     const state = useStore();
@@ -37,7 +37,7 @@ describe('ngx-store', () => {
   });
 
   it('should select a slice of state', () => {
-    const useStore = createStore<TestState>(() => ({ count: 5, name: 'slice' }));
+    const useStore = createStash<TestState>(() => ({ count: 5, name: 'slice' }));
     const count = useStore.select(state => state.count);
     
     expect(count()).toBe(5);
@@ -47,7 +47,7 @@ describe('ngx-store', () => {
   });
 
   it('should subscribe to changes', () => {
-    const useStore = createStore<TestState>(() => ({ count: 0, name: 'sub' }));
+    const useStore = createStash<TestState>(() => ({ count: 0, name: 'sub' }));
     const spy = jasmine.createSpy('listener');
     
     const unsub = useStore.subscribe(spy);
@@ -69,7 +69,7 @@ describe('ngx-store', () => {
           inc: () => void;
       }
       
-      const useStore = createStore<StoreWithActions>((set) => ({
+      const useStore = createStash<StoreWithActions>((set) => ({
           count: 0,
           name: 'actions',
           inc: () => set((state) => ({ count: state.count + 1 }))

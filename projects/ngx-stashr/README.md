@@ -1,6 +1,6 @@
-# ngx-store
+# ngx-stashr
 
-A slim, signal-based state management library for Angular 21. 
+A slim, signal-based library for stashing state Angular 21. 
 
 Inspired by Zustand.
 
@@ -10,12 +10,12 @@ _TODO: need to finishing publishing_
 
 ## Usage
 
-### Create a store
+### Create a stash
 
-Define your state and actions in a store file (e.g., `counter.store.ts`).
+Define your state and actions in a state file (e.g., `counter.state.ts`).
 
 ```typescript
-import { createStore } from 'ngx-store';
+import { createStash } from 'ngx-stashr';
 
 interface CounterState {
   count: number;
@@ -24,7 +24,7 @@ interface CounterState {
   reset: () => void;
 }
 
-export const counterStore = createStore<CounterState>((set) => ({
+export const counterStash = createStash<CounterState>((set) => ({
   count: 0,
   increment: () => set((state) => ({ count: state.count + 1 })),
   decrement: () => set((state) => ({ count: state.count - 1 })),
@@ -34,24 +34,24 @@ export const counterStore = createStore<CounterState>((set) => ({
 
 ### Use in your components
 
-Use the store directly in your components. It's just a signal really.
+Use the stash directly in your components. It's just a signal really.
 
 ```typescript
 import { Component } from '@angular/core';
-import { counterStore } from './counter.store';
+import { counterStash } from './counter.state';
 
 @Component({
   selector: 'app-counter',
   standalone: true,
   template: `
-    <h1>Count: {{ store().count }}</h1>
-    <button (click)="store().increment()">+</button>
-    <button (click)="store().decrement()">-</button>
-    <button (click)="store().reset()">Reset</button>
+    <h1>Count: {{ stash().count }}</h1>
+    <button (click)="stash().increment()">+</button>
+    <button (click)="stash().decrement()">-</button>
+    <button (click)="stash().reset()">Reset</button>
   `
 })
 export class CounterComponent {
-  readonly store = counterStore;
+  readonly stash = counterStash;
 }
 ```
 
@@ -62,13 +62,13 @@ You can create computed signals for specific slices of state. This can further o
 ```typescript
 @Component({ ... })
 export class CounterDisplayComponent {
-  readonly store = counterStore;
+  readonly stash = counterStash;
   
   // only updates when count changes
-  readonly count = this.store.select(state => state.count);
+  readonly count = this.stash.select(state => state.count);
   
   // derived state
-  readonly doubleCount = this.store.select(state => state.count * 2);
+  readonly doubleCount = this.stash.select(state => state.count * 2);
 }
 ```
 
@@ -79,9 +79,9 @@ export class CounterDisplayComponent {
 You can persist state to `localStorage` (or any other storage) using the `persist` middleware.
 
 ```typescript
-import { createStore, persist } from 'ngx-store';
+import { createStash, persist } from 'ngx-stashr';
 
-export const settingsStore = createStore(
+export const settingsStash = createStash(
   persist(
     (set) => ({
       theme: 'light',
@@ -102,16 +102,16 @@ export const settingsStore = createStore(
 You can debug the state mutations with the `logger` middleware. It will report the previous state, action, and next state to the console.
 
 ```typescript
-import { createStore, logger } from 'ngx-store';
+import { createStash, logger } from 'ngx-stashr';
 
-export const store = createStore(
+export const stash = createStash(
   logger(
     (set) => ({
       count: 0,
       increment: () => set((state) => ({ count: state.count + 1 }), false, 'increment')
     }),
     { 
-      name: 'CounterStore',
+      name: 'CounterStash',
       enabled: true // defaults to true
     }
   )
@@ -123,11 +123,11 @@ export const store = createStore(
 You can compose middleware by swallowing. Just make sure `persist` sits as the outer wrapper if chaining it.
 
 ```typescript
-export const store = createStore(
+export const stash = createStash(
   persist(
     logger(
       (set) => ({ count: 0 }),
-      { name: 'MyStore' }
+      { name: 'MyStash' }
     ),
     { name: 'storage-key' }
   )
@@ -136,14 +136,14 @@ export const store = createStore(
 
 ## Core API
 
-### `createStore<T>(setup: StateCreator<T>)`
+### `createStash<T>(setup: StateCreator<T>)`
 
-Creates a store. Returns a Signal that also contains API methods.
+Creates a stash. Returns a Signal that also contains API methods.
 
-### Store Methods
+### Stash Methods
 
-- `store()`: Get the current state (signal).
-- `store.get()`: Get the current state (non-reactive readonly snapshot).
-- `store.set(partial, replace?, ...args)`: Update state. `partial` can be an object or a function `(state) => partial`. Optional `args` are passed to listeners (just useful for logging actions).
-- `store.select(selector)`: Create a computed signal from the state.
-- `store.subscribe(listener)`: Subscribe to state changes manually.
+- `stash()`: Get the current state (signal).
+- `stash.get()`: Get the current state (non-reactive readonly snapshot).
+- `stash.set(partial, replace?, ...args)`: Update state. `partial` can be an object or a function `(state) => partial`. Optional `args` are passed to listeners (just useful for logging actions).
+- `stash.select(selector)`: Create a computed signal from the state.
+- `stash.subscribe(listener)`: Subscribe to state changes manually.

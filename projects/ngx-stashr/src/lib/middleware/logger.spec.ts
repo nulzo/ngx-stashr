@@ -1,4 +1,4 @@
-import { createStore } from '../core/store';
+import { createStash } from '../core/store';
 import { logger } from './logger';
 
 interface TestState {
@@ -17,7 +17,7 @@ describe('logger middleware', () => {
   });
 
   it('should log state changes', () => {
-    const useStore = createStore(
+    const useStore = createStash(
       logger<TestState>(
         (set) => ({ count: 0 }),
         { name: 'test-store' }
@@ -47,7 +47,7 @@ describe('logger middleware', () => {
   });
 
   it('should use default action name if not provided', () => {
-    const useStore = createStore(
+    const useStore = createStash(
       logger<TestState>(
         (set) => ({ count: 0 })
       )
@@ -61,7 +61,7 @@ describe('logger middleware', () => {
   });
 
   it('should not log if disabled', () => {
-    const useStore = createStore(
+    const useStore = createStash(
       logger<TestState>(
         (set) => ({ count: 0 }),
         { enabled: false }

@@ -1,5 +1,5 @@
 /*
- * Public API Surface of ngx-store
+ * Public API Surface of ngx-stashr
  */
 
 export * from './lib/core/types';

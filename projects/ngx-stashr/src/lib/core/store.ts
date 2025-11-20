@@ -1,7 +1,7 @@
 import { signal, computed, WritableSignal, Signal } from '@angular/core';
 import { StateCreator, Store, StoreApi, PartialState, StateListener } from './types';
 
-export function createStore<T extends object>(createState: StateCreator<T>): Store<T> {
+export function createStash<T extends object>(createState: StateCreator<T>): Store<T> {
   let state: T;
   const listeners = new Set<StateListener<T>>();
 
@@ -51,7 +51,7 @@ export function createStore<T extends object>(createState: StateCreator<T>): Sto
   const storeFn = (() => stateSignal()) as Store<T>;
 
   // assign signal properties.
-  Object.defineProperty(storeFn, 'name', { value: 'ngx-store' });
+  Object.defineProperty(storeFn, 'name', { value: 'ngx-stashr' });
   Object.assign(storeFn, stateSignal);
   
   // TODO: can we clean this piece up???

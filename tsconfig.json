@@ -8,8 +8,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "paths": {
-      "ngx-store": [
-        "./dist/ngx-store"
+      "ngx-stashr": [
+        "./dist/ngx-stashr"
       ]
     },
     "noFallthroughCasesInSwitch": true,
@@ -29,10 +29,10 @@
   "files": [],
   "references": [
     {
-      "path": "./projects/ngx-store/tsconfig.lib.json"
+      "path": "./projects/ngx-stashr/tsconfig.lib.json"
     },
     {
-      "path": "./projects/ngx-store/tsconfig.spec.json"
+      "path": "./projects/ngx-stashr/tsconfig.spec.json"
     }
   ]
 }

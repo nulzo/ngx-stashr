@@ -48,7 +48,7 @@ export const persist = <T extends object>(
         });
         storage.setItem(key, serialized);
       } catch (e) {
-        console.error('[ngx-store/persist] Error saving to storage:', e);
+        console.error('[ngx-stashr/persist] Error saving to storage:', e);
       }
     };
 
@@ -65,7 +65,7 @@ export const persist = <T extends object>(
           }
         }
       } catch (e) {
-        console.error('[ngx-store/persist] Error hydrating from storage:', e);
+        console.error('[ngx-stashr/persist] Error hydrating from storage:', e);
       }
     }
 

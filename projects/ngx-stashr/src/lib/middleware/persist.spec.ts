@@ -1,4 +1,4 @@
-import { createStore } from '../core/store';
+import { createStash } from '../core/store';
 import { persist } from './persist';
 
 interface TestState {
@@ -20,7 +20,7 @@ describe('persist middleware', () => {
   });
 
   it('should persist state to storage', () => {
-    const useStore = createStore(
+    const useStore = createStash(
       persist<TestState>(
         () => ({ count: 0 }),
         { name: 'test-storage', storage: mockStorage }
@@ -37,7 +37,7 @@ describe('persist middleware', () => {
   it('should hydrate state from storage', () => {
     mockStorage.getItem.and.returnValue(JSON.stringify({ state: { count: 10 }, version: 0 }));
     
-    const useStore = createStore(
+    const useStore = createStash(
       persist<TestState>(
         () => ({ count: 0 }),
         { name: 'test-storage', storage: mockStorage }
@@ -53,7 +53,7 @@ describe('persist middleware', () => {
       ignored: string;
     }
     
-    const useStore = createStore(
+    const useStore = createStash(
       persist<ComplexState>(
         () => ({ count: 0, ignored: 'skip' }),
         { 
