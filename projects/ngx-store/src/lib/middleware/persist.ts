@@ -30,7 +30,7 @@ export const persist = <T extends object>(
     const storage = options.storage || (typeof window !== 'undefined' ? window.localStorage : undefined);
     const key = options.name;
     
-    // Wrap set to persist changes
+    // we need to wrap here in order to persist changes downstream
     const savedSet = api.set;
     
     api.set = (partial, replace) => {
@@ -52,10 +52,9 @@ export const persist = <T extends object>(
       }
     };
 
-    // Initialize base state
     let initialState = config(api.set, get, api);
     
-    // Hydrate from storage
+    // we need to hydrate here if we can
     if (storage) {
       try {
         const item = storage.getItem(key);

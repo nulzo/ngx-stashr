@@ -7,7 +7,7 @@ export type StateListener<T> = (state: T, previousState: T, ...args: unknown[]) 
 
 export interface StoreApi<T> {
   /**
-   * Get the current state value (non-reactive)
+   * Get the current state value (non-reactive).
    */
   get: () => T;
 
@@ -29,7 +29,7 @@ export interface StoreApi<T> {
   subscribe: (listener: StateListener<T>) => () => void;
 
   /**
-   * Clean up the store (will clear listeners)
+   * Clean up the store (will clear listeners).
    */
   destroy: () => void;
 }
@@ -42,7 +42,7 @@ export type Store<T> = Signal<T> & StoreApi<T> & {
   select: <K>(selector: (state: T) => K) => Signal<K>;
 };
 
-// The initializer function that the user provides
+// initializer function.
 export type StateCreator<T> = (
   set: StoreApi<T>['set'],
   get: StoreApi<T>['get'],

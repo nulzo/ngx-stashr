@@ -20,10 +20,8 @@ export function createStore<T extends object>(createState: StateCreator<T>): Sto
       ? (nextState as T)
       : { ...state, ...nextState };
     
-    // Update the signal
     stateSignal.set(state);
     
-    // Notify listeners
     listeners.forEach(listener => listener(state, previousState, ...args));
   };
 
@@ -45,27 +43,22 @@ export function createStore<T extends object>(createState: StateCreator<T>): Sto
     destroy
   };
 
-  // Initialize state using the creator
+  // initialize state.
   state = createState(setState, getState, api);
-  
-  // Create the internal signal
+  // the internal signal.
   const stateSignal: WritableSignal<T> = signal<T>(state);
-
-  // Create the result object which is a Signal function with API properties attached
+  // the result object is a signal function with properties attached.
   const storeFn = (() => stateSignal()) as Store<T>;
-  
-  // Assign signal properties
+
+  // assign signal properties.
   Object.defineProperty(storeFn, 'name', { value: 'ngx-store' });
-  // Mimic Signal API
   Object.assign(storeFn, stateSignal);
   
-  // Attach Store API
+  // TODO: can we clean this piece up???
   storeFn.get = api.get;
   storeFn.set = api.set;
   storeFn.subscribe = api.subscribe;
-  storeFn.destroy = api.destroy;
-  
-  // Attach select method
+  storeFn.destroy = api.destroy;  
   storeFn.select = <K>(selector: (state: T) => K): Signal<K> => {
     return computed(() => selector(stateSignal()));
   };

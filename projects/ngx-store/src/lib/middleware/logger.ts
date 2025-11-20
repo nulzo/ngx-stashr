@@ -27,8 +27,6 @@ export const logger = <T extends object>(
     const enabled = options.enabled ?? true;
     const storeName = options.name ?? 'NgxStore';
     const log = options.log ?? console.log;
-    
-    // Safe console methods for environments where they might not exist
     const groupCollapsed = (console.groupCollapsed || console.log).bind(console);
     const groupEnd = (console.groupEnd || console.log).bind(console);
 
@@ -39,21 +37,19 @@ export const logger = <T extends object>(
       }
 
       const prevState = get();
-      const action = args[0] ?? 'anonymous'; // Assume first extra arg is action name
+      const action = args[0] ?? 'anonymous';
 
       set(partial, replace, ...args);
       
       const nextState = get();
-      
       const time = new Date();
       const timeStr = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}:${time.getSeconds().toString().padStart(2, '0')}.${time.getMilliseconds().toString().padStart(3, '0')}`;
 
       try {
-        // CSS styling for console logs
         const headerCss = [
-          'color: gray; font-weight: lighter;', // name
-          'color: gray; font-weight: lighter;', // time
-          'color: inherit; font-weight: bold;'  // action
+          'color: gray; font-weight: lighter;',
+          'color: gray; font-weight: lighter;',
+          'color: inherit; font-weight: bold;'
         ];
         
         groupCollapsed(
