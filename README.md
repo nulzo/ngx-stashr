@@ -1,6 +1,14 @@
-# ngx-stashr
+</br>
+<div style="width: 100%;" align="center">
+  <a href="https://github.com/nulzo/ngx-stashr">
+    <img src="docs/images/ngx-stashr3.png" style="width: 100%;" alt="">
+  </a>
+</div>
 
-A slim, signal-based library for stashing state in Angular 21. 
+<h3 align="center">Slim, signal based library for stashing state in Angular 21.</h3>
+
+</br>
+
 
 Inspired by React's [Zustand]().
 
