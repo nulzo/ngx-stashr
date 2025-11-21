@@ -1,6 +1,6 @@
 <div style="width: 100%;" align="center">
   <a href="https://github.com/nulzo/ngx-stashr">
-    <img src="docs/images/ngx-stashr3.png" style="width: 100%;" alt="">
+    <img src="docs/images/ngx-stashr3.png" style="width: 80%; height: 80%" alt="">
   </a>
 </div>
 
@@ -8,9 +8,8 @@
 
 </br></br></br></br>
 
-<p align="center">
-Inspired by React Zustand.
-</p>
+
+Inspired by React's [Zustand]().
 
 </br>
 
