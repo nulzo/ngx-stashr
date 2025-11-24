@@ -1,17 +1,29 @@
 <div style="width: 100%;" align="center">
-  <a href="https://github.com/nulzo/ngx-stashr">
-    <img src="docs/images/ngx-stashr3.png" style="width: 80%; height: 80%" alt="">
+  <a href="https://github.com/nulzo/ngx-cachr">
+    <img src="docs/images/ngx-stashr3.png" style="width: 300px;" alt="ngx-cachr logo">
   </a>
 </div>
 
-<h3 align="center">Slim, signal based library for stashing state in Angular 21.</h3>
+<br/>
 
-</br></br></br></br>
+<p align="center">
+  <strong>A slim, signal-based library for shashing state in Angular.</strong>
+</p>
 
+<br/>
 
-Inspired by React's [Zustand]().
+<p align="center">
+  <a href="https://www.npmjs.com/package/ngx-stashr">
+    <img src="https://img.shields.io/npm/v/ngx-stashr.svg" alt="npm version">
+  </a>
+  <a href="https://www.npmjs.com/package/ngx-stashr">
+    <img src="https://img.shields.io/npm/dm/ngx-stashr.svg" alt="npm downloads">
+  </a>
+  <a href="https://github.com/nulzo/ngx-stashr/blob/main/LICENSE">
+    <img src="https://img.shields.io/npm/l/ngx-stashr.svg" alt="license">
+  </a>
+</p>
 
-</br>
 
 ## Installation
 
