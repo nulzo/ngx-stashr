@@ -1,6 +1,6 @@
 {
   "name": "ngx-stashr",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A slim, signal-based library for stashing state in Angular.",
   "keywords": [
     "angular",
