@@ -2,7 +2,7 @@
 
 A slim, signal-based library for stashing state in Angular 21. 
 
-Inspired by React's [Zustand]().
+Inspired by React's [Zustand](https://github.com/pmndrs/zustand).
 
 ## Installation
 
@@ -44,7 +44,6 @@ import { counterStash } from './counter.state';
 
 @Component({
   selector: 'app-counter',
-  standalone: true,
   template: `
     <h1>Count: {{ stash().count }}</h1>
     <button (click)="stash().increment()">+</button>
@@ -76,7 +75,7 @@ export class CounterDisplayComponent {
 
 ## Middleware
 
-### Persust
+### Persist
 
 You can persist state to `localStorage` (or any other storage) using the `persist` middleware.
 
@@ -93,11 +92,16 @@ export const settingsStash = createStash(
     }),
     {
       name: 'app-settings', // unique name
-      // storage: sessionStorage // optional, just defaults as localStorage
+      // storage: sessionStorage // optional, defaults to localStorage
+      // partialize: (state) => ({ theme: state.theme }), // optional, pick what to persist
+      // version: 1, // optional, bump to invalidate old stored state
+      // migrate: (persisted, version) => ({ theme: 'light' }), // optional, runs on version mismatch
     }
   )
 );
 ```
+
+The `storage` option accepts any `StateStorage` (`getItem` / `setItem` / `removeItem`), so `localStorage`, `sessionStorage`, or your own adapter all work.
 
 ### Logging and debugging
 
@@ -120,9 +124,9 @@ export const stash = createStash(
 );
 ```
 
-### Chaining middlwares
+### Chaining middleware
 
-You can compose middleware by swallowing. Just make sure `persist` sits as the outer wrapper if chaining it.
+You can compose middleware by wrapping. Composition order does not matter — `persist` subscribes to state changes rather than wrapping `set`, so action names and listeners behave identically in any order.
 
 ```typescript
 export const stash = createStash(
@@ -146,6 +150,7 @@ Creates a stash. Returns a Signal that also contains API methods.
 
 - `stash()`: Get the current state (signal).
 - `stash.get()`: Get the current state (non-reactive readonly snapshot).
-- `stash.set(partial, replace?, ...args)`: Update state. `partial` can be an object or a function `(state) => partial`. Optional `args` are passed to listeners (just useful for logging actions).
-- `stash.select(selector)`: Create a computed signal from the state.
+- `stash.set(partial, replace?, ...args)`: Update state. `partial` can be an object or a function `(state) => partial`. Pass `replace: true` to replace the state entirely (requires the full state). Optional `args` are passed to listeners (just useful for logging actions).
+- `stash.select(selector, options?)`: Create a computed signal from the state. Accepts computed options, e.g. `{ equal: shallowEqual }` to customize change detection for the selected slice.
 - `stash.subscribe(listener)`: Subscribe to state changes manually.
+- `stash.destroy()`: Clear all listeners.
