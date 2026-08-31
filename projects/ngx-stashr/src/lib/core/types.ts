@@ -21,6 +21,12 @@ export interface StoreApi<T> {
   get: () => T;
 
   /**
+   * Get the state the store was created with (after middleware hydration).
+   * Useful for resets: `set(getInitialState(), true)`.
+   */
+  getInitialState: () => T;
+
+  /**
    * Update the state.
    * Can pass a partial state object or a function that receives current state and returns partial state.
    * The new state is merged with the existing state (shallow merge).

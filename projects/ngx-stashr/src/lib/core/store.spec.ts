@@ -210,6 +210,16 @@ describe('ngx-stashr', () => {
     expect(spy2).toHaveBeenCalledTimes(1);
   });
 
+  it('should expose the initial state for resets', () => {
+    const useStore = createStash<TestState>(() => ({ count: 0, name: 'initial' }));
+
+    useStore.set({ count: 42, name: 'changed' });
+    expect(useStore.get()).toEqual({ count: 42, name: 'changed' });
+
+    useStore.set(useStore.getInitialState(), true);
+    expect(useStore.get()).toEqual({ count: 0, name: 'initial' });
+  });
+
   it('should support actions in the store', () => {
     interface StoreWithActions extends TestState {
       inc: () => void;

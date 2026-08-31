@@ -3,6 +3,7 @@ import { StateCreator, StateListener, Store, StoreApi } from './types';
 
 export function createStash<T extends object>(createState: StateCreator<T>): Store<T> {
   let state: T;
+  let initialState: T;
   let stateSignal: WritableSignal<T>;
   const listeners = new Set<StateListener<T>>();
 
@@ -23,6 +24,7 @@ export function createStash<T extends object>(createState: StateCreator<T>): Sto
 
   const api: StoreApi<T> = {
     get: () => state,
+    getInitialState: () => initialState,
     set: setState,
     subscribe: (listener) => {
       listeners.add(listener);
@@ -32,6 +34,7 @@ export function createStash<T extends object>(createState: StateCreator<T>): Sto
   };
 
   state = createState(setState, api.get, api);
+  initialState = state;
   stateSignal = signal(state);
 
   // the store is the readonly signal itself, with the api attached.
@@ -39,6 +42,7 @@ export function createStash<T extends object>(createState: StateCreator<T>): Sto
   // leaking onto the store and bypassing middleware.
   const storeFn = stateSignal.asReadonly() as Store<T>;
   storeFn.get = api.get;
+  storeFn.getInitialState = api.getInitialState;
   storeFn.set = api.set;
   storeFn.subscribe = api.subscribe;
   storeFn.destroy = api.destroy;
