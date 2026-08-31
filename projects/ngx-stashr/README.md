@@ -1,6 +1,6 @@
 # ngx-stashr
 
-A slim, signal-based library for stashing state in Angular 21. 
+A slim, signal-based library for stashing state in Angular.
 
 Inspired by React's [Zustand](https://github.com/pmndrs/zustand).
 
@@ -56,7 +56,7 @@ export class CounterComponent {
 }
 ```
 
-### Selectors (ie computed state)
+### Selectors (i.e. computed state)
 
 You can create computed signals for specific slices of state. This can further optimize performance if needed.
 
@@ -76,7 +76,7 @@ export class CounterDisplayComponent {
 When selecting object or array slices, pass `shallow` as the equality function so consumers only update when the items actually change (selectors return fresh references otherwise):
 
 ```typescript
-import { createStash, shallow } from 'ngx-stashr';
+import { shallow } from 'ngx-stashr';
 
 readonly items = this.stash.select(state => state.items, { equal: shallow });
 ```
@@ -154,6 +154,8 @@ export const stash = createStash(
 ### `createStash<T>(setup: StateCreator<T>)`
 
 Creates a stash. Returns a Signal that also contains API methods.
+
+The setup function receives `(set, get, api)`: `set` updates state, `get` reads the current state (useful inside actions), and `api` exposes the full store API (`getInitialState`, `subscribe`, ...) — mostly useful when writing middleware.
 
 ### Stash Methods
 
