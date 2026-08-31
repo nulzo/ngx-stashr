@@ -1,67 +1,48 @@
-import { signal, computed, WritableSignal, Signal } from '@angular/core';
-import { StateCreator, Store, StoreApi, PartialState, StateListener } from './types';
+import { computed, signal, WritableSignal } from '@angular/core';
+import { StateCreator, StateListener, Store, StoreApi } from './types';
 
 export function createStash<T extends object>(createState: StateCreator<T>): Store<T> {
   let state: T;
+  let stateSignal: WritableSignal<T>;
   const listeners = new Set<StateListener<T>>();
 
   const setState: StoreApi<T>['set'] = (partial, replace, ...args) => {
-    const nextState = typeof partial === 'function' 
-      ? (partial as (state: T) => Partial<T>)(state)
-      : partial;
-
+    const nextState =
+      typeof partial === 'function' ? (partial as (state: T) => Partial<T>)(state) : partial;
     const previousState = state;
-    
+
     if (Object.is(nextState, previousState)) {
       return;
     }
 
-    state = replace 
-      ? (nextState as T)
-      : { ...state, ...nextState };
-    
-    stateSignal.set(state);
-    
-    listeners.forEach(listener => listener(state, previousState, ...args));
-  };
-
-  const getState: StoreApi<T>['get'] = () => state;
-
-  const subscribe: StoreApi<T>['subscribe'] = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  };
-
-  const destroy: StoreApi<T>['destroy'] = () => {
-    listeners.clear();
+    state = replace ? (nextState as T) : { ...state, ...nextState };
+    // undefined while the creator is still running (set during init)
+    stateSignal?.set(state);
+    listeners.forEach((listener) => listener(state, previousState, ...args));
   };
 
   const api: StoreApi<T> = {
-    get: getState,
+    get: () => state,
     set: setState,
-    subscribe,
-    destroy
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    destroy: () => listeners.clear(),
   };
 
-  // initialize state.
-  state = createState(setState, getState, api);
-  // the internal signal.
-  const stateSignal: WritableSignal<T> = signal<T>(state);
-  // the result object is a signal function with properties attached.
-  const storeFn = (() => stateSignal()) as Store<T>;
+  state = createState(setState, api.get, api);
+  stateSignal = signal(state);
 
-  // assign signal properties.
-  Object.defineProperty(storeFn, 'name', { value: 'ngx-stashr' });
-  Object.assign(storeFn, stateSignal);
-  
-  // TODO: can we clean this piece up???
+  // the store is the readonly signal itself, with the api attached.
+  // asReadonly() keeps raw writable-signal methods (update/asReadonly) from
+  // leaking onto the store and bypassing middleware.
+  const storeFn = stateSignal.asReadonly() as Store<T>;
   storeFn.get = api.get;
   storeFn.set = api.set;
   storeFn.subscribe = api.subscribe;
-  storeFn.destroy = api.destroy;  
-  storeFn.select = <K>(selector: (state: T) => K): Signal<K> => {
-    return computed(() => selector(stateSignal()));
-  };
+  storeFn.destroy = api.destroy;
+  storeFn.select = (selector, options) => computed(() => selector(stateSignal()), options);
 
   return storeFn;
 }
