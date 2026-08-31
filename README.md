@@ -94,6 +94,14 @@ export class CounterDisplayComponent {
 }
 ```
 
+When selecting object or array slices, pass `shallow` as the equality function so consumers only update when the items actually change (selectors return fresh references otherwise):
+
+```typescript
+import { createStash, shallow } from 'ngx-stashr';
+
+readonly items = this.stash.select(state => state.items, { equal: shallow });
+```
+
 ## Middleware
 
 ### Persist
@@ -117,6 +125,7 @@ export const settingsStash = createStash(
       // partialize: (state) => ({ theme: state.theme }), // optional, pick what to persist
       // version: 1, // optional, bump to invalidate old stored state
       // migrate: (persisted, version) => ({ theme: 'light' }), // optional, runs on version mismatch
+      // merge: (persisted, current) => ({ ...current, ...persisted }), // optional, custom hydration merge
     }
   )
 );
@@ -171,6 +180,7 @@ Creates a stash. Returns a Signal that also contains API methods.
 
 - `stash()`: Get the current state (signal).
 - `stash.get()`: Get the current state (non-reactive readonly snapshot).
+- `stash.getInitialState()`: Get the state the stash was created with (after hydration). Useful for resets: `stash.set(stash.getInitialState(), true)`.
 - `stash.set(partial, replace?, ...args)`: Update state. `partial` can be an object or a function `(state) => partial`. Pass `replace: true` to replace the state entirely (requires the full state). Optional `args` are passed to listeners (just useful for logging actions).
 - `stash.select(selector, options?)`: Create a computed signal from the state. Accepts computed options, e.g. `{ equal: shallowEqual }` to customize change detection for the selected slice.
 - `stash.subscribe(listener)`: Subscribe to state changes manually.
