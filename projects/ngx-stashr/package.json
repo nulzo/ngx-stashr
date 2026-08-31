@@ -11,6 +11,12 @@
     "store"
   ],
   "author": "nulzo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nulzo/ngx-stashr.git",
+    "directory": "projects/ngx-stashr"
+  },
   "peerDependencies": {
     "@angular/common": "^19.0.0 || ^20.0.0 || ^21.0.0",
     "@angular/core": "^19.0.0 || ^20.0.0 || ^21.0.0"

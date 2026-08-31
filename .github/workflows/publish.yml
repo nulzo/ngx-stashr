@@ -1,0 +1,46 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  id-token: write # OIDC: npm trusted publishing + provenance attestation
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      - name: Guard against republishing an existing version
+        run: |
+          VERSION=$(node -p "require('./dist/ngx-stashr/package.json').version")
+          if npm view "ngx-stashr@$VERSION" version 2>/dev/null | grep -q .; then
+            echo "::error::ngx-stashr@$VERSION is already on npm. Bump projects/ngx-stashr/package.json first."
+            exit 1
+          fi
+
+      # Uses npm trusted publishing (OIDC) — no tokens stored in GitHub.
+      # One-time setup: npmjs.com -> package settings -> Trusted Publishers ->
+      # GitHub Actions -> repo "nulzo/ngx-store", workflow "publish.yml".
+      # Requires npm CLI >= 11.5.1 (bundled with Node 24).
+      - name: Publish to npm
+        working-directory: dist/ngx-stashr
+        run: npm publish --access public --provenance
+
+      # Token-based alternative: create a granular npm token, store it as an
+      # NPM_TOKEN repo secret, add `registry-url: https://registry.npmjs.org`
+      # to setup-node, and set `env: NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`
+      # on the publish step above.

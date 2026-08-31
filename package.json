@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build ngx-stashr",
-    "publish": "cd dist/ngx-stashr && npm publish --access public",
+    "publish": "npm run build && npm publish ./dist/ngx-stashr --access public",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers=ChromeHeadless"
   },
