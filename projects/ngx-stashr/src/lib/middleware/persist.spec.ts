@@ -115,6 +115,58 @@ describe('persist middleware', () => {
     expect(useStore().count).toBe(100);
   });
 
+  it('should support custom merge for hydration', () => {
+    mockStorage.getItem.and.returnValue(
+      JSON.stringify({ state: { nested: { value: 10 } }, version: 0 })
+    );
+
+    interface NestedState {
+      nested: { value: number; other: string };
+    }
+
+    const useStore = createStash(
+      persist<NestedState>(
+        () => ({ nested: { value: 0, other: 'keep' } }),
+        {
+          name: 'test-custom-merge',
+          storage: mockStorage,
+          merge: (persistedState, currentState) => ({
+            ...currentState,
+            nested: {
+              ...currentState.nested,
+              ...(persistedState as Partial<NestedState>).nested,
+            },
+          }),
+        }
+      )
+    );
+
+    // shallow merge would have wiped `other`; the custom merge preserves it
+    expect(useStore().nested).toEqual({ value: 10, other: 'keep' });
+  });
+
+  it('should write migrated state back to storage', () => {
+    mockStorage.getItem.and.returnValue(JSON.stringify({ state: { count: 10 }, version: 1 }));
+
+    const useStore = createStash(
+      persist<TestState>(
+        () => ({ count: 0 }),
+        {
+          name: 'test-migrate-writeback',
+          storage: mockStorage,
+          version: 2,
+          migrate: (persistedState) => ({ count: (persistedState as TestState).count * 10 }),
+        }
+      )
+    );
+
+    expect(useStore().count).toBe(100);
+    const written = mockStorage.setItem.calls.mostRecent().args;
+    expect(written[0]).toBe('test-migrate-writeback');
+    expect(written[1]).toContain('"count":100');
+    expect(written[1]).toContain('"version":2');
+  });
+
   it('should partialize state', () => {
     interface ComplexState {
       count: number;

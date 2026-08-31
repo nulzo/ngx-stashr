@@ -36,6 +36,12 @@ export interface PersistOptions<T> {
    * Migrate persisted state from an older version to the current one.
    */
   migrate?: (persistedState: unknown, version: number) => Partial<T>;
+
+  /**
+   * Custom merge for combining persisted state with the current state
+   * during hydration. Defaults to a shallow merge.
+   */
+  merge?: (persistedState: unknown, currentState: T) => T;
 }
 
 export const persist = <T extends object>(
@@ -53,16 +59,25 @@ export const persist = <T extends object>(
       return initialState;
     }
 
-    // subscribe instead of wrapping set: composes transparently in any
-    // middleware order and never writes when a set bails out as a no-op.
-    api.subscribe((state) => {
+    const save = (state: T) => {
       try {
         const stateToSave = options.partialize ? options.partialize(state) : state;
         storage.setItem(options.name, JSON.stringify({ state: stateToSave, version }));
       } catch (e) {
         console.error('[ngx-stashr/persist] Error saving to storage:', e);
       }
-    });
+    };
+
+    // subscribe instead of wrapping set: composes transparently in any
+    // middleware order and never writes when a set bails out as a no-op.
+    api.subscribe(save);
+
+    const merge =
+      options.merge ??
+      ((persistedState: unknown, currentState: T) => ({
+        ...currentState,
+        ...(persistedState as Partial<T>),
+      }));
 
     try {
       const item = storage.getItem(options.name);
@@ -74,11 +89,14 @@ export const persist = <T extends object>(
         const storedVersion = stored.version ?? 0;
 
         if (storedVersion === version) {
-          return { ...initialState, ...stored.state };
+          return merge(stored.state, initialState);
         }
 
         if (options.migrate) {
-          return { ...initialState, ...options.migrate(stored.state, storedVersion) };
+          const migrated = merge(options.migrate(stored.state, storedVersion), initialState);
+          // write back so the stored version bumps and migration runs once
+          save(migrated);
+          return migrated;
         }
 
         console.warn(
