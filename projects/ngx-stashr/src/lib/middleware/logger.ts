@@ -6,17 +6,17 @@ export interface LoggerOptions {
    * Defaults to 'NgxStore'.
    */
   name?: string;
-  
+
   /**
    * Enable or disable logging.
    * Defaults to true.
    */
   enabled?: boolean;
-  
+
   /**
    * Custom log function.
    */
-  log?: (...args: any[]) => void;
+  log?: (...args: unknown[]) => void;
 }
 
 export const logger = <T extends object>(
@@ -27,8 +27,6 @@ export const logger = <T extends object>(
     const enabled = options.enabled ?? true;
     const storeName = options.name ?? 'NgxStore';
     const log = options.log ?? console.log;
-    const groupCollapsed = (console.groupCollapsed || console.log).bind(console);
-    const groupEnd = (console.groupEnd || console.log).bind(console);
 
     const loggedSet: StoreApi<T>['set'] = (partial, replace, ...args) => {
       if (!enabled) {
@@ -40,24 +38,22 @@ export const logger = <T extends object>(
       const action = args[0] ?? 'anonymous';
 
       set(partial, replace, ...args);
-      
+
       const nextState = get();
-      const time = new Date();
-      const timeStr = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}:${time.getSeconds().toString().padStart(2, '0')}.${time.getMilliseconds().toString().padStart(3, '0')}`;
+      const time = new Date().toLocaleTimeString('en-GB', {
+        hour12: false,
+        fractionalSecondDigits: 3,
+      });
 
       try {
-        const headerCss = [
+        console.groupCollapsed(
+          `%c${storeName}%c @ ${time} %c${action}`,
           'color: gray; font-weight: lighter;',
           'color: gray; font-weight: lighter;',
           'color: inherit; font-weight: bold;'
-        ];
-        
-        groupCollapsed(
-          `%c${storeName}%c @ ${timeStr} %c${action}`, 
-          ...headerCss
         );
-      } catch (e) {
-        log(`${storeName} @ ${timeStr} ${action}`);
+      } catch {
+        log(`${storeName} @ ${time} ${action}`);
       }
 
       log('%c prev state', 'color: #9E9E9E; font-weight: bold', prevState);
@@ -65,8 +61,10 @@ export const logger = <T extends object>(
       log('%c next state', 'color: #4CAF50; font-weight: bold', nextState);
 
       try {
-        groupEnd();
-      } catch (e) {}
+        console.groupEnd();
+      } catch {
+        // grouping unsupported; nothing to close
+      }
     };
 
     api.set = loggedSet;
@@ -74,4 +72,3 @@ export const logger = <T extends object>(
     return config(loggedSet, get, api);
   };
 };
-
