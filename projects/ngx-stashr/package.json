@@ -1,7 +1,7 @@
 {
   "name": "ngx-stashr",
   "version": "0.1.0",
-  "description": "A slim, signal-based library for stashing state in Angular 21.",
+  "description": "A slim, signal-based library for stashing state in Angular.",
   "keywords": [
     "angular",
     "state",
@@ -12,8 +12,8 @@
   ],
   "author": "nulzo",
   "peerDependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0"
+    "@angular/common": "^19.0.0 || ^20.0.0 || ^21.0.0",
+    "@angular/core": "^19.0.0 || ^20.0.0 || ^21.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
